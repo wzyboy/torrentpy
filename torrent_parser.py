@@ -13,6 +13,7 @@ class TorrentParser(object):
     STR_START = re.compile(b'\d+(?=:)')
     LIST_START = b'l'
     DICT_START = b'd'
+    END = b'e'
 
     def __init__(self, raw_torrent):
         self.raw_torrent = raw_torrent
@@ -49,7 +50,7 @@ class TorrentParser(object):
     def try_next(self):
         print('try next')
         remainder = self.get_remainder()
-        if remainder[0] == ord(self.INT_START):
+        if remainder[0:1] == self.INT_START:
             print('next is int')
             item = self.parse_int()
             return item
@@ -57,22 +58,22 @@ class TorrentParser(object):
             print('next is str')
             item = self.parse_str()
             return item
-        elif remainder[0] == ord(self.LIST_START):
+        elif remainder[0:1] == self.LIST_START:
             print('next is list')
             self.cursor += 1
             item = self.parse_list()
             return item
-        elif remainder[0] == ord(self.DICT_START):
+        elif remainder[0:1] == self.DICT_START:
             print('next is dict')
             self.cursor += 1
             item = self.parse_dict()
             return item
-        elif remainder[0] == ord(b'e'):
+        elif remainder[0:1] == b'e':
             print('next is END')
             self.cursor += 1
             return None
         else:
-            raise ValueError('Unknown next item: {}'.format(remainder[0]))
+            raise ValueError('Unknown next item: {}'.format(remainder[0:1]))
 
     def parse_list(self):
         print('parse list')
@@ -103,8 +104,8 @@ class TorrentParser(object):
 
     def parse(self):
         print('start parse')
-        if self.raw_torrent[0] != ord(self.DICT_START):
-            raise ValueError('Torrent not starting with a dict')
+        if self.raw_torrent[0:1] != self.DICT_START:
+            raise ValueError('Not a torrent file')
         else:
             self.cursor += 1
         parsed_torrent = self.parse_dict()
