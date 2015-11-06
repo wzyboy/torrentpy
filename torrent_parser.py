@@ -3,7 +3,7 @@
 import re
 import sys
 import json
-from hashlib import sha1
+from binascii import hexlify
 from collections import OrderedDict
 
 
@@ -41,7 +41,7 @@ class TorrentParser(object):
         self.cursor = str_end_pos
         try:
             decoded_string = string.decode('utf-8')
-        except UnicodeDecodeError: # hash_list
+        except UnicodeDecodeError:  # hash_list
             return string
         return decoded_string
 
@@ -100,7 +100,7 @@ class TorrentParser(object):
         parsed_torrent = self.parse_dict()
         pieces = parsed_torrent['info']['pieces']
         hash_list = [
-            sha1(pieces[i:i + 20]).hexdigest()
+            hexlify(pieces[i:i + 20]).decode('utf-8')
             for
             i in range(0, len(pieces), 20)
         ]
