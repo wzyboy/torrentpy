@@ -11,6 +11,7 @@ from collections import OrderedDict
 class TorrentComposer(object):
 
     INT_TPL = 'i{}e'
+    STR = (str, bytes) if sys.version_info.major == 3 else basestring  # NOQA
     STR_SEP = b':'
     LIST_START = b'l'
     DICT_START = b'd'
@@ -27,7 +28,7 @@ class TorrentComposer(object):
     def compose_str(self, string):
         try:
             bin_str = string.encode('utf-8')
-        except AttributeError:  # hash_list
+        except (AttributeError, UnicodeDecodeError):  # hash_list
             bin_str = string
         composed_str = b''
         composed_str += str(len(bin_str)).encode('utf-8')
@@ -39,7 +40,7 @@ class TorrentComposer(object):
         if isinstance(item, int):
             composed_int = self.compose_int(item)
             return composed_int
-        elif isinstance(item, str) or isinstance(item, bytes):
+        elif isinstance(item, self.STR):
             composed_str = self.compose_str(item)
             return composed_str
         elif isinstance(item, list):
